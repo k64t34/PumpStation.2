@@ -1,6 +1,6 @@
 *.bak
-/.vs/* 
-/sw/bin/*
-/sw/obj/*
+/sw/.vs/* 
+/sw/sw/bin/*
+/sw/sw/obj/*
 /pump/bin/*
 /pump/obj/*

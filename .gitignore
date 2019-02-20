@@ -1,0 +1,6 @@
+*.bak
+/.vs/* 
+/sw/bin/*
+/sw/obj/*
+/pump/bin/*
+/pump/obj/*

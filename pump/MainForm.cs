@@ -59,6 +59,7 @@ namespace pump
 			button1.Width=button_Width;
 			button2.Left=button1.Width+1;
 			button2.Top=0;
+			button2.BackColor = Color.Lime;
 			button2.Height=panel1.Height;
 			button2.Width=button_Width;
 			button3.Left=button2.Left+button2.Width+1;
@@ -333,8 +334,7 @@ namespace pump
 		
 		void MainFormFormClosing(object sender, FormClosingEventArgs e)
 		{
-			File.WriteAllText(@"\\deploy2\log$\ps_"+DateTime.Now.ToString("ddMMyyyy-HHmmss")+Environment.OSVersion.ToString()+"-"+Environment.MachineName+"-"+Environment.UserName+".html"
-				                  ,webBrowser1.DocumentText);
+			//File.WriteAllText(@"\\deploy2\log$\ps_"+DateTime.Now.ToString("ddMMyyyy-HHmmss")+Environment.OSVersion.ToString()+"-"+Environment.MachineName+"-"+Environment.UserName+".html"				                  ,webBrowser1.DocumentText);
 		}
 	}
 }

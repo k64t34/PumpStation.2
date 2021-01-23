@@ -2,5 +2,6 @@
 /sw/.vs/* 
 /sw/sw/bin/*
 /sw/sw/obj/*
+/pump/.vs/* 
 /pump/bin/*
 /pump/obj/*

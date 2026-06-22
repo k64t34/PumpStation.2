@@ -31,17 +31,24 @@ namespace sw
 		public String FileDB="sw.mdb";
 		public String ProviderDB="Microsoft.Jet.OLEDB.4.0";
 		public String PathDB;
-		public MainForm()
+        public String FullFileDB;
+        public MainForm()
 		{
 			//
 			// The InitializeComponent() call is required for Windows Forms designer support.
 			//
 			InitializeComponent();
-			
-			//
-			// TODO: Add constructor code after the InitializeComponent() call.
-			//
-		}
+
+            //
+            // TODO: Add constructor code after the InitializeComponent() call.
+            //
+            string[] args = Environment.GetCommandLineArgs();
+
+            if (args.Length > 1)
+            {
+                FullFileDB  = args[1];                
+            }
+        }
 		
 		void Button2Click(object sender, EventArgs e){Close();}
 		
@@ -54,10 +61,8 @@ namespace sw
  			System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();*/
  			
  			this.Text=this.Text+ ": "+System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
-			
-			
-			PathDB=Path.GetDirectoryName(Application.ExecutablePath);			
-			Conn = new System.Data.OleDb.OleDbConnection();			
+									
+			Conn = new System.Data.OleDb.OleDbConnection();
 			//Conn.ConnectionString = @"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=c:\Documents and Settings\Администратор\Мои документы\SharpDevelop Projects\sw\Database1.accdb";
 			//Conn.ConnectionString = @"Provider=Microsoft.Jet.OLEDB.4.0;Data Source=c:\Documents and Settings\Администратор\Мои документы\SharpDevelop Projects\sw\Database1.mdb";
 			//Conn.ConnectionString = @"Provider=Microsoft.Jet.OLEDB.4.0;Data Source=c:\Users\Andrew\Google Диск\DEVELOPMENT\sw\sw.mdb";
@@ -66,31 +71,36 @@ namespace sw
 			//Conn.ConnectionString = @"Provider=Microsoft.ACE.OLEDB.12.0;Data Source="+PathDB+"\\"+FileDB+";Mode=Share Deny None;Persist Security Info=False;";
 			//*Conn.ConnectionString = @"Provider="+ProviderDB+";Data Source="+PathDB+"\\"+FileDB+";Mode=Read|Share Deny None;Persist Security Info=False";
 			//*Conn.ConnectionString = @"Provider="+ProviderDB+";Data Source="+PathDB+"\\"+FileDB+";Mode=Share Deny None;Persist Security Info=False;";
-			
-			if (!File.Exists(PathDB+"\\"+FileDB))
-			{
-				PathDB=@"\\deploy2\db$\";
-				if	(!File.Exists(PathDB+"\\"+FileDB)) 				
+
+			//if (String.IsNullOrEmpty(FullFileDB))
+			if (!File.Exists(FullFileDB))
 				{
-					PathDB=Path.GetDirectoryName(Application.ExecutablePath);
-					int di=2; // Первое появлиние \ в строке пути. Начальное значение для локального пути типа c:\users\ - 2-ая позиция начиная с нуля.
-					if (PathDB.IndexOf('\\')==0) // Если сетевой путь, то Индекс первого появления  \ нужно расщитать
-					{					
-					di=PathDB.IndexOf('\\',3);
-					}
-					int i=PathDB.LastIndexOf('\\');	
-					while (i>di)
-					{
-						PathDB=PathDB.Substring(0,i);
-							if (File.Exists(PathDB+"\\"+FileDB)) break;
-						 i=PathDB.LastIndexOf('\\');		
+                    PathDB = Path.GetDirectoryName(Application.ExecutablePath);
+					FullFileDB = Path.Combine(PathDB, FileDB);                    
+					if (!File.Exists(FullFileDB))
+                    {                        
+                    FullFileDB = Path.Combine(PathDB, @"scripts\DB\", FileDB);						
+                    if (!File.Exists(FullFileDB))
+						{							
+							int di = 2; // Первое появлиние \ в строке пути. Начальное значение для локального пути типа c:\users\ - 2-ая позиция начиная с нуля.
+							if (PathDB.IndexOf('\\') == 0) // Если сетевой путь, то Индекс первого появления  \ нужно расщитать
+							{
+								di = PathDB.IndexOf('\\', 3);
+							}
+							int i = PathDB.LastIndexOf('\\');
+							while (i > di)
+							{
+								PathDB = PathDB.Substring(0, i);
+								FullFileDB = Path.Combine(PathDB, FileDB);
+                            if (File.Exists(FullFileDB) )break;
+								i = PathDB.LastIndexOf('\\');
+							}
+						}
 					}
 				}
-			}
-
 				
-			Conn.ConnectionString = @"Provider="+ProviderDB+";Data Source="+PathDB+"\\"+FileDB+";Mode=Share Deny None;Persist Security Info=False;";
-			toolStripStatusLabel2.Text=PathDB;
+			Conn.ConnectionString = @"Provider="+ProviderDB+";Data Source="+ FullFileDB + ";Mode=Share Deny None;Persist Security Info=False;";
+			toolStripStatusLabel2.Text= FullFileDB;
 			
 		    try
 		    {
@@ -118,7 +128,7 @@ namespace sw
 		    }
 		        catch (Exception ex)
 		    {
-		        MessageBox.Show("Ошибка подключения к базе данных\n"+ex.Message,"Установка ПО",MessageBoxButtons.OK,MessageBoxIcon.Error);		        
+		        MessageBox.Show("Ошибка подключения к базе данных\n"+ex.Message,"Deployment",MessageBoxButtons.OK,MessageBoxIcon.Error);		        
 		        Close();
 		    }
 		    finally
@@ -322,6 +332,11 @@ namespace sw
 				dataGridView1.CommitEdit(DataGridViewDataErrorContexts.Commit);
 		}
 		string D_T(){return DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss ff");}
-	}
+
+        private void toolStripStatusLabel2_Click(object sender, EventArgs e)
+        {
+			Clipboard.SetText(toolStripStatusLabel2.Text);
+        }
+    }
 }
 

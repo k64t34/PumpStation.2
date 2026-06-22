@@ -141,7 +141,7 @@ namespace sw
 		void Button1Click(object sender, EventArgs e)
 		{
 			if (selectCnt==0) Close();
-			String idList="";
+			String idList= "\""+FullFileDB +"\" ";
 			foreach (DataGridViewRow row in dataGridView1.Rows)
 				{
 					if (Convert.ToBoolean(row.Cells[0].Value))
@@ -164,7 +164,7 @@ namespace sw
 			}
 	        catch (Exception ex)
 		    {		        
-		        MessageBox.Show("Ошибка запуска\n"+ex.Message,"Установка ПО",MessageBoxButtons.OK,MessageBoxIcon.Error);
+		        MessageBox.Show("Ошибка запуска\n"+ex.Message+"\n"+ idList, "Установка ПО",MessageBoxButtons.OK,MessageBoxIcon.Error);
 		    }
 		    finally
 		    {
@@ -336,6 +336,11 @@ namespace sw
         private void toolStripStatusLabel2_Click(object sender, EventArgs e)
         {
 			Clipboard.SetText(toolStripStatusLabel2.Text);
+        }
+
+        private void lProgPath_Click(object sender, EventArgs e)
+        {
+            Clipboard.SetText(lProgPath.Text);
         }
     }
 }

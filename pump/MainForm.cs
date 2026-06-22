@@ -7,15 +7,16 @@
  * To change this template use Tools | Options | Coding | Edit Standard Headers.
  */
 using System;
-using System.IO;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Windows.Forms; 
-using System.Data.OleDb;
 using System.Data;
+using System.Data.OleDb;
 using System.Diagnostics;
+using System.Drawing;
+using System.IO;
 using System.Threading;
 using System.Timers;
+using System.Windows.Forms; 
+using static System.Net.Mime.MediaTypeNames;
 
 namespace pump
 {
@@ -29,10 +30,9 @@ namespace pump
 		const string _SP3 = "&nbsp;&nbsp;&nbsp;";
 		
 		System.Data.OleDb.OleDbConnection Conn;
-		string DBFile="sw.mdb";
-		string DBPath="";
 		string ProviderDB="Microsoft.Jet.OLEDB.4.0";
-		int cmdTimeCounter=0;
+        String FullFileDB;
+        int cmdTimeCounter=0;
 		string stridsw;
 		Thread thread;
 		System.Timers.Timer timer1 = new System.Timers.Timer();
@@ -154,6 +154,7 @@ namespace pump
 		
 		void WriteLog(string message)
 		{
+			
 		    if (webBrowser1.InvokeRequired)
 		    {
 		        webBrowser1.BeginInvoke(new Action<string>((s)=> webBrowser1.Document.Write(s)), message);
@@ -183,18 +184,19 @@ namespace pump
 			}
 			WriteLog("<html><meta charset=\"utf-8\"><style>body{background-color: black;color:grey;font-family: monospace;font-size:16;padding:0}</style><body text=\"grey\" bgcolor=\"black\">");
 			//-*  В оригинале цвет шрифта 192,192,192,
-			WriteLog(D_T() + t_color("white"," Включение насоса") +_BR);
-			WriteLog(_SP3+"Параметры задания: ");
+			WriteLog(D_T() + t_color("white"," Включение насоса") +_BR);			
 			string[] args = Environment.CommandLine.Split(new[] { ' ' },StringSplitOptions.RemoveEmptyEntries);
-			if (args.Length==0)
+			if (args.Length<3)
 			{
-				WriteLog(_BR+D_T()  +  t_color("YELLOW"," WARN Нет параметров задания")+_BR);
+				WriteLog(_BR+D_T()  +  t_color("YELLOW", " WARN Нет параметров задания")+_BR+t_color("CYAN", "pump.exe &lt;путь_к_базе_данных&gt; &lt;id1&gt; &lt;id2&gt; &lt;id3&gt; ...") +_BR);
 				pClose();
 				return;
 			}
-			string idList="";
+            WriteLog(_SP3 + "Параметры задания: ");
+            string idList="";
 			int testInt;
-			for (int i=0;i!=args.Length;i++)			
+			FullFileDB = args[1].Trim('"'); 
+            for (int i=2;i!=args.Length;i++)
 			{
 				
 				if (int.TryParse(args[i],out testInt))
@@ -217,37 +219,15 @@ namespace pump
 			}
 			
 			WriteLog(D_T()  +  t_color("white"," Подключение к базе данных")+_BR);
-			//---Open DB 
-			DBFile="sw.mdb";
-			DBPath=Path.GetDirectoryName(Application.ExecutablePath);
-			if (!File.Exists(DBPath+"\\"+DBFile))
-				{
-					DBPath=@"\\deploy2\db$\";
-					if	(!File.Exists(DBPath+"\\"+DBFile)) 				
-					{
-						int di=2; // Первое появлиние \ в строке пути. Начальное значение для локального пути типа c:\users\ - 2-ая позиция начиная с нуля.
-						if (DBPath.IndexOf('\\')==0) // Если сетевой путь, то Индекс первого появления  \ нужно расщитать
-						{					
-						di=DBPath.IndexOf('\\',3);
-						}
-						int i=DBPath.LastIndexOf('\\');	
-						while (i>di)
-						{
-							DBPath=DBPath.Substring(0,i);
-								if (File.Exists(DBPath+"\\"+DBFile)) break;
-							 i=DBPath.LastIndexOf('\\');		
-						}
-					}
-				}			
-			
-			if (!File.Exists(DBPath+"\\"+DBFile))
+			//---Open DB 			
+			if (!File.Exists(FullFileDB))
 			{
-				WriteLog(D_T()  +  t_color("RED"," ERR: Файл базы данных {0} не найден",DBPath+"\\"+DBFile)+_BR);
+				WriteLog(D_T()  +  t_color("RED"," ERR: Файл базы данных {0} не найден", FullFileDB) +_BR);
 				pClose();
 				return;
 			}
 			Conn = new System.Data.OleDb.OleDbConnection();			
-			Conn.ConnectionString = @"Provider="+ProviderDB+";Data Source="+DBPath+"\\"+DBFile+";Mode=Read;";
+			Conn.ConnectionString = @"Provider="+ProviderDB+";Data Source="+ FullFileDB + ";Mode=Read;";
 			OleDbCommand cmd = new OleDbCommand();		        
 		    cmd.CommandText="select * from DialogInstall where id in ("+idList+")";		    
 		    cmd.Connection=Conn;

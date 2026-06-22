@@ -301,6 +301,7 @@ namespace sw
             this.lProgPath.Size = new System.Drawing.Size(447, 16);
             this.lProgPath.TabIndex = 2;
             this.lProgPath.Text = "lPathName";
+            this.lProgPath.Click += new System.EventHandler(this.lProgPath_Click);
             // 
             // lProgName
             // 
